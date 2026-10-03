@@ -11,7 +11,7 @@ import requests
 # Make sure you've activated your virtual environment and installed requirements.txt
 
 BASE_URL = "https://jsonplaceholder.typicode.com"
- 
+
 # ============================================================
 # TASK 1: GET all users
 # ============================================================
@@ -26,7 +26,7 @@ print("Total Users:", len(users))
 
 for user in users:
     print(user["name"], "-", user["email"])
-    
+
 
 # ============================================================
 # TASK 2: GET posts by user #3
@@ -35,10 +35,7 @@ for user in users:
 print("\nTASK 2: Posts by User #3")
 print("-" * 40)
 
-response = requests.get(
-    BASE_URL + "/posts",
-    params={"userId": 3}
-)
+response = requests.get(BASE_URL + "/posts", params={"userId": 3})
 
 posts = response.json()
 
@@ -77,13 +74,10 @@ print("-" * 40)
 new_post = {
     "title": "My First API Post",
     "body": "This post was created using a POST request.",
-    "userId": 1
+    "userId": 1,
 }
 
-response = requests.post(
-    BASE_URL + "/posts",
-    json=new_post
-)
+response = requests.post(BASE_URL + "/posts", json=new_post)
 
 created_post = response.json()
 
