@@ -2,6 +2,7 @@ import requests
 
 BASE_URL = "https://jsonplaceholder.typicode.com"
 
+
 def report(method, url, **kwargs):
     """Make a request and return a formatted report."""
 
@@ -25,12 +26,11 @@ def report(method, url, **kwargs):
         400: "Bad Request — server could not understand the request",
         401: "Unauthorized — authentication is required",
         404: "Not Found — resource could not be found",
-        500: "Internal Server Error — server encountered an error"
+        500: "Internal Server Error — server encountered an error",
     }
 
     description = descriptions.get(
-        status,
-        "Request completed with an unexpected status code"
+        status, "Request completed with an unexpected status code"
     )
 
     return {
@@ -38,7 +38,7 @@ def report(method, url, **kwargs):
         "url": url,
         "status": status,
         "category": category,
-        "description": description
+        "description": description,
     }
 
 
@@ -48,6 +48,7 @@ def print_report(r):
     print(f"{r['method']} {r['url']}")
     print(f"Status: {r['status']} ({r['category']})")
     print(f"Description: {r['description']}")
+
 
 print("Status Code Detective\n")
 
@@ -72,11 +73,7 @@ print("\n3. POST /posts with valid data")
 r = report(
     "POST",
     f"{BASE_URL}/posts",
-    json={
-        "title": "New Post",
-        "body": "This is a new post.",
-        "userId": 1
-    }
+    json={"title": "New Post", "body": "This is a new post.", "userId": 1},
 )
 print_report(r)
 
@@ -100,5 +97,3 @@ print("\n6. GET /users/1/todos")
 
 r = report("GET", f"{BASE_URL}/users/1/todos")
 print_report(r)
-
-
