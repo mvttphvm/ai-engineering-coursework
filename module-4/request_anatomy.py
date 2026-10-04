@@ -8,7 +8,7 @@ def print_separator(title):
     """Print a section separator."""
     print(f"\n{'=' * 55}")
     print(f"  {title}")
-    print('=' * 55)
+    print("=" * 55)
 
 
 def display_anatomy(response, label):
@@ -47,8 +47,5 @@ display_anatomy(response, "POST /posts")
 
 
 print_separator("REQUEST 3: PATCH /posts/1")
-response = requests.patch(
-    f"{BASE_URL}/posts/1",
-    json={"title": "Updated Title"}
-)
+response = requests.patch(f"{BASE_URL}/posts/1", json={"title": "Updated Title"})
 display_anatomy(response, "PATCH /posts/1")
