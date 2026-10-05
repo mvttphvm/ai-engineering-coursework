@@ -1,0 +1,12 @@
+Part 1 - curl Practice
+GET all users
+curl https://jsonplaceholder.typicode.com/users | python -m json.tool
+
+GET user 3's todos
+curl "https://jsonplaceholder.typicode.com/todos?userId=3" | python -m json.tool
+
+POST a new post
+curl -X POST https://jsonplaceholder.typicode.com/posts -H "Content-Type: application/json" -d '{"title":"My API Post","body":"Learning how to use APIs with curl.","userId":1}'
+
+Show only the response headers for /posts/1
+curl -I https://jsonplaceholder.typicode.com/posts/1
