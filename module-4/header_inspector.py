@@ -29,9 +29,7 @@ for url, label in endpoints:
 
     for header in caching_headers:
         if header in response.headers:
-            found_cache_headers.append(
-                f"{header}: {response.headers[header]}"
-            )
+            found_cache_headers.append(f"{header}: {response.headers[header]}")
 
     if found_cache_headers:
         print("Caching headers present:")
@@ -41,18 +39,13 @@ for url, label in endpoints:
         print("Caching headers: None")
 
     # Check for rate-limiting headers
-    rate_limit_headers = [
-        "X-RateLimit-Limit",
-        "X-RateLimit-Remaining"
-    ]
+    rate_limit_headers = ["X-RateLimit-Limit", "X-RateLimit-Remaining"]
 
     found_rate_headers = []
 
     for header in rate_limit_headers:
         if header in response.headers:
-            found_rate_headers.append(
-                f"{header}: {response.headers[header]}"
-            )
+            found_rate_headers.append(f"{header}: {response.headers[header]}")
 
     if found_rate_headers:
         print("Rate-limiting headers:")
@@ -70,20 +63,12 @@ for url, label in endpoints:
 
 print("\nPART 2: POST to httpbin.org with custom header\n")
 
-data = {
-    "message": "Hello!",
-    "exercise": "Header Inspector"
-}
+data = {"message": "Hello!", "exercise": "Header Inspector"}
 
-custom_headers = {
-    "X-Student-Name": "Matt"
-}
+custom_headers = {"X-Student-Name": "Matt"}
 
 response = requests.post(
-    "https://httpbin.org/post",
-    json=data,
-    headers=custom_headers,
-    timeout=10
+    "https://httpbin.org/post", json=data, headers=custom_headers, timeout=10
 )
 
 print(f"Status: {response.status_code}")
