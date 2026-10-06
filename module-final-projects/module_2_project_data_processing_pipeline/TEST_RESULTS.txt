@@ -1,0 +1,29 @@
+Module 2 Project Validation Results
+===================================
+
+Pipeline run: PASS
+Python syntax compilation: PASS
+
+Dataset checks:
+- Raw rows loaded: 200
+- Duplicate employee IDs removed: 10
+- Clean rows exported: 190
+- Remaining duplicate employee IDs: 0
+- Remaining missing values: 0
+- Remaining negative salaries: 0
+- years_experience values all within 0-50: PASS
+- satisfaction_score values all within 1-10: PASS
+- Department normalization: PASS
+- Office location normalization: PASS
+
+Output checks:
+- output/clean_data.csv created: PASS
+- output/charts.png created: PASS
+
+Error-handling check:
+- Missing input file handled without crashing: PASS
+
+Example raw -> clean check (employee_id 28):
+- department: Eng -> Engineering
+- office_location: seattle -> Seattle
+- salary: $86,963.55 -> 86963.55

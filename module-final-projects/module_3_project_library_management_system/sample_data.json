@@ -1,0 +1,28 @@
+{
+  "authors": [
+    { "name": "J.R.R. Tolkien", "bio": "English author and professor, best known for The Lord of the Rings trilogy." },
+    { "name": "George Orwell", "bio": "English novelist and essayist known for 1984 and Animal Farm." },
+    { "name": "Jane Austen", "bio": "English novelist known for her works of romantic fiction set among the landed gentry." }
+  ],
+  "books": [
+    { "title": "The Hobbit",            "isbn": "978-0618260300", "year_published": 1937, "available_copies": 3, "authors": ["J.R.R. Tolkien"] },
+    { "title": "1984",                  "isbn": "978-0451524935", "year_published": 1949, "available_copies": 2, "authors": ["George Orwell"] },
+    { "title": "Animal Farm",           "isbn": "978-0451526342", "year_published": 1945, "available_copies": 2, "authors": ["George Orwell"] },
+    { "title": "Pride and Prejudice",   "isbn": "978-0141439518", "year_published": 1813, "available_copies": 2, "authors": ["Jane Austen"] },
+    { "title": "Sense and Sensibility", "isbn": "978-0141439662", "year_published": 1811, "available_copies": 1, "authors": ["Jane Austen"] }
+  ],
+  "members": [
+    { "name": "Alice Chen",    "email": "alice@example.com" },
+    { "name": "Bob Martinez",  "email": "bob@example.com"   },
+    { "name": "Clara Okafor",  "email": "clara@example.com" },
+    { "name": "David Kim",     "email": "david@example.com" }
+  ],
+  "borrowings": [
+    { "book_isbn": "978-0618260300", "member_email": "alice@example.com", "checkout_date": "2026-05-01", "return_date": "2026-05-10" },
+    { "book_isbn": "978-0451524935", "member_email": "bob@example.com",   "checkout_date": "2026-05-15", "return_date": "2026-05-28" },
+    { "book_isbn": "978-0141439518", "member_email": "clara@example.com", "checkout_date": "2026-05-20", "return_date": null },
+    { "book_isbn": "978-0451526342", "member_email": "alice@example.com", "checkout_date": "2026-05-22", "return_date": null },
+    { "book_isbn": "978-0618260300", "member_email": "david@example.com", "checkout_date": "2026-05-25", "return_date": null },
+    { "book_isbn": "978-0141439662", "member_email": "bob@example.com",   "checkout_date": "2026-05-10", "return_date": "2026-05-20" }
+  ]
+}
