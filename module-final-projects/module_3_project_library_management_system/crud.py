@@ -5,11 +5,18 @@ crud.py — Create, Read, Update, Delete operations
 
 from datetime import date, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
 
 from models import engine, Book, Author, Member, Borrowing
+
+
+def valid_email(email):
+    if not isinstance(email, str):
+        return False
+    email = email.strip()
+    return bool(email) and email.count("@") == 1 and "." in email.split("@")[-1] and not any(c.isspace() for c in email)
 
 
 # ──────────────────────────────────────────
@@ -19,12 +26,15 @@ from models import engine, Book, Author, Member, Borrowing
 def add_book(title: str, isbn: str, year_published: int = None,
              available_copies: int = 1, author_ids: list[int] = None):
     """Add a new book to the database. Returns the created Book object."""
-    if not title.strip():
+    if not isinstance(title, str) or not title.strip():
         raise ValueError("Title cannot be blank.")
-    if not isbn.strip():
+    if not isinstance(isbn, str) or not isbn.strip():
         raise ValueError("ISBN cannot be blank.")
-    if available_copies < 0:
+    if type(available_copies) is not int or available_copies < 0:
         raise ValueError("Available copies cannot be negative.")
+
+    if year_published is not None and (type(year_published) is not int or year_published < 0 or year_published > date.today().year):
+        raise ValueError("Publication year must be between 0 and the current year.")
 
     with Session(engine, expire_on_commit=False) as session:
         try:
@@ -53,7 +63,7 @@ def add_book(title: str, isbn: str, year_published: int = None,
 
 def add_author(name: str, bio: str = None):
     """Add a new author. Returns the created Author object."""
-    if not name.strip():
+    if not isinstance(name, str) or not name.strip():
         raise ValueError("Author name cannot be blank.")
 
     with Session(engine, expire_on_commit=False) as session:
@@ -72,9 +82,9 @@ def add_member(name: str, email: str):
     Register a new member with today's date as membership_date.
     Returns the created Member object.
     """
-    if not name.strip():
+    if not isinstance(name, str) or not name.strip():
         raise ValueError("Member name cannot be blank.")
-    if not email.strip() or "@" not in email:
+    if not valid_email(email):
         raise ValueError("Please enter a valid email address.")
 
     with Session(engine, expire_on_commit=False) as session:
@@ -99,6 +109,10 @@ def checkout_book(book_id: int, member_id: int, checkout_date: date = None):
     Raises ValueError if the book is unavailable or IDs are invalid.
     Returns the created Borrowing object.
     """
+    if checkout_date is not None and not isinstance(checkout_date, date):
+        raise ValueError("Checkout date must be a date.")
+    if checkout_date is not None and checkout_date > date.today():
+        raise ValueError("Checkout date cannot be in the future.")
     with Session(engine, expire_on_commit=False) as session:
         book = session.get(Book, book_id)
         member = session.get(Member, member_id)
@@ -107,7 +121,14 @@ def checkout_book(book_id: int, member_id: int, checkout_date: date = None):
             raise ValueError("Book not found.")
         if member is None:
             raise ValueError("Member not found.")
-        if book.available_copies <= 0:
+        # Update the copy count only if a copy is still available.
+        # This also prevents two simultaneous checkouts from taking the last copy.
+        result = session.execute(
+            update(Book)
+            .where(Book.id == book_id, Book.available_copies > 0)
+            .values(available_copies=Book.available_copies - 1)
+        )
+        if result.rowcount == 0:
             raise ValueError("That book has no available copies.")
 
         borrowing = Borrowing(
@@ -115,7 +136,6 @@ def checkout_book(book_id: int, member_id: int, checkout_date: date = None):
             member=member,
             checkout_date=checkout_date or date.today(),
         )
-        book.available_copies -= 1
 
         try:
             session.add(borrowing)
@@ -177,6 +197,8 @@ def list_overdue_books(days: int = 14):
     Return Borrowing objects where return_date is NULL and
     checkout_date is more than `days` days ago.
     """
+    if type(days) is not int or days < 0:
+        raise ValueError("Overdue threshold must be a nonnegative number of days.")
     cutoff_date = date.today() - timedelta(days=days)
 
     with Session(engine) as session:
@@ -205,6 +227,8 @@ def return_book(borrowing_id: int, return_date: date = None):
     Sets return_date and increments book.available_copies by 1.
     Raises ValueError if the borrowing is not found or already returned.
     """
+    if return_date is not None and not isinstance(return_date, date):
+        raise ValueError("Return date must be a date.")
     with Session(engine, expire_on_commit=False) as session:
         borrowing = session.get(Borrowing, borrowing_id)
 
@@ -213,7 +237,12 @@ def return_book(borrowing_id: int, return_date: date = None):
         if borrowing.return_date is not None:
             raise ValueError("That book has already been returned.")
 
-        borrowing.return_date = return_date or date.today()
+        actual_return_date = return_date or date.today()
+        if actual_return_date < borrowing.checkout_date:
+            raise ValueError("Return date cannot be before checkout date.")
+        if actual_return_date > date.today():
+            raise ValueError("Return date cannot be in the future.")
+        borrowing.return_date = actual_return_date
         borrowing.book.available_copies += 1
 
         try:
@@ -226,7 +255,7 @@ def return_book(borrowing_id: int, return_date: date = None):
 
 def update_member_email(member_id: int, new_email: str):
     """Update the email address for a member. Returns the updated Member object."""
-    if not new_email.strip() or "@" not in new_email:
+    if not valid_email(new_email):
         raise ValueError("Please enter a valid email address.")
 
     with Session(engine, expire_on_commit=False) as session:
@@ -265,6 +294,8 @@ def delete_book(book_id: int):
         )
         if active:
             raise ValueError("Cannot delete a book that is currently borrowed.")
+        if session.scalar(select(Borrowing.id).where(Borrowing.book_id == book_id).limit(1)) is not None:
+            raise ValueError("Cannot delete a book with borrowing history; history must be preserved.")
 
         try:
             session.delete(book)
@@ -292,6 +323,8 @@ def delete_member(member_id: int):
         )
         if active:
             raise ValueError("Cannot delete a member with active borrowings.")
+        if session.scalar(select(Borrowing.id).where(Borrowing.member_id == member_id).limit(1)) is not None:
+            raise ValueError("Cannot delete a member with borrowing history; history must be preserved.")
 
         try:
             session.delete(member)
@@ -299,3 +332,19 @@ def delete_member(member_id: int):
         except SQLAlchemyError:
             session.rollback()
             raise ValueError("Could not delete the member.")
+
+
+def list_authors():
+    with Session(engine) as session:
+        return list(session.scalars(select(Author).order_by(Author.name)))
+
+def list_members():
+    with Session(engine) as session:
+        return list(session.scalars(select(Member).order_by(Member.name)))
+
+def list_borrowings(active_only=False):
+    with Session(engine) as session:
+        stmt = select(Borrowing).options(selectinload(Borrowing.book), selectinload(Borrowing.member)).order_by(Borrowing.id)
+        if active_only:
+            stmt = stmt.where(Borrowing.return_date.is_(None))
+        return list(session.scalars(stmt))

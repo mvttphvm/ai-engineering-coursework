@@ -4,11 +4,13 @@ models.py — SQLAlchemy models and database setup
 """
 
 from datetime import date
+from pathlib import Path
 
 from sqlalchemy import CheckConstraint, Column, Date, ForeignKey, Integer, String, Table, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-engine = create_engine("sqlite:///library.db", echo=False)
+DB_PATH = Path(__file__).resolve().parent / "library.db"
+engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
 
 
 class Base(DeclarativeBase):

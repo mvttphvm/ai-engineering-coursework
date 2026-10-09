@@ -1,146 +1,102 @@
 # Library Management System
 
-A command-line library management application built with Python, SQLite, and SQLAlchemy 2.0. The program stores books, authors, members, and borrowing history, and supports common library operations such as adding books and members, searching, checking books out, returning books, and viewing overdue items.
+This is my Module 3 final project. I built a command-line library management program using Python, SQLite, and SQLAlchemy. The program stores information about books, authors, and library members. It also keeps track of book checkouts and returns.
 
-## Database Design
+## What the Program Does
 
-The project uses four main models plus one association table:
+The menu lets you:
 
-- `books` stores title, ISBN, publication year, and available copies.
-- `authors` stores author names and optional biographies.
-- `members` stores member names, unique emails, and membership dates.
-- `borrowings` connects a member to a book and stores checkout and return dates.
-- `book_authors` connects books and authors for the many-to-many relationship.
+- Add books, authors, and members.
+- Search for books by title or author.
+- View books, authors, members, and their IDs.
+- Check out and return books.
+- See a member's current checkouts.
+- Find overdue books (more than 14 days old).
+- Update a member's email address.
+- Delete books and members that do not have borrowing history.
+- View all borrowing records, including returned books.
 
-## ERD
+The program also checks for common mistakes, such as entering an ID that does not exist, checking out a book with no available copies, or using an ISBN or email address that is already in the database.
 
-```mermaid
-erDiagram
-    AUTHORS }o--o{ BOOKS : writes
-    BOOKS ||--o{ BORROWINGS : has
-    MEMBERS ||--o{ BORROWINGS : makes
+## Files
 
-    AUTHORS {
-        int id PK
-        string name
-        string bio
-    }
+- `main.py` — Runs the menu and asks the user for input.
+- `models.py` — Defines the database tables and relationships.
+- `crud.py` — Contains the functions for adding, reading, updating, and deleting records.
+- `seed.py` — Adds missing sample records without overwriting existing data.
+- `sample_data.json` — Contains the example books, authors, members, and borrowings.
+- `requirements.txt` — Lists the Python package needed for the project.
+- `library_erd.png` — Diagram of the database tables and relationships.
+- `README.md` — Explains the project and how to run it.
 
-    BOOKS {
-        int id PK
-        string title
-        string isbn UK
-        int year_published
-        int available_copies
-    }
+The program uses `library.db` to store records. The included database has sample records for testing.
 
-    MEMBERS {
-        int id PK
-        string name
-        string email UK
-        date membership_date
-    }
+## How to Run the Project
 
-    BORROWINGS {
-        int id PK
-        int book_id FK
-        int member_id FK
-        date checkout_date
-        date return_date
-    }
-```
+Open a terminal in the project folder.
 
-A book can have multiple authors and an author can have multiple books, so `book_authors` is used as a many-to-many association table. A book and a member can both have many borrowing records, while each borrowing belongs to one book and one member.
+1. Install SQLAlchemy:
 
-## Project Files
+   ```bash
+   python3 -m pip install -r requirements.txt
+   ```
+2. If you want to load the example records, run:
 
-- `models.py` — SQLAlchemy models, relationships, and database setup
-- `crud.py` — create, read, update, and delete functions
-- `main.py` — command-line menu and user interaction
-- `seed.py` — loads the sample data
-- `sample_data.json` — sample authors, books, members, and borrowings
-- `requirements.txt` — project dependency
+   ```bash
+   python3 seed.py
+   ```
 
-## Setup
+   Running this again is safe: existing records are preserved, and missing sample records are added without duplicates. The program also works without sample data, so this step is optional.
+3. Start the menu:
 
-1. Create and activate a virtual environment.
-2. Install the dependency:
+   ```bash
+   python3 main.py
+   ```
 
-   `pip install -r requirements.txt`
+   Enter a menu number and follow the prompts. The program shows the available IDs when you need to select a book, author, member, or borrowing.
 
-3. Seed the database:
+On later runs, you can just use `python3 main.py`. The records stay saved in `library.db`.
 
-   `python seed.py`
+**Reset warning:** Running `python3 seed.py --reset` and typing `RESET` deletes the existing database records and reloads the examples. Do not use it if you want to keep your current data.
 
-   Note: running `seed.py` resets the database before loading the sample data.
+## Database Tables and Relationships
 
-4. Start the application:
+I used five tables:
 
-   `python main.py`
+| Table            | Main columns                                                      | Purpose                                                        |
+| ---------------- | ----------------------------------------------------------------- | -------------------------------------------------------------- |
+| `authors`      | id (PK), name, bio                                                | Stores author information.                                     |
+| `books`        | id (PK), title, isbn (unique), year_published, available_copies   | Stores book information.                                       |
+| `members`      | id (PK), name, email (unique), membership_date                    | Stores library members.                                        |
+| `book_authors` | book_id (FK), author_id (FK)                                      | Connects books and authors. Both columns form the primary key. |
+| `borrowings`   | id (PK), book_id (FK), member_id (FK), checkout_date, return_date | Records each checkout and return.                              |
 
-## CLI Menu
+PK means primary key, which identifies a record. FK means foreign key, which connects one table to another. 
 
-The application provides these options:
+### Database Relationships (ERD)
 
-1. Add a book
-2. Add a member
-3. Search books
-4. Check out a book
-5. Return a book
-6. View a member's active borrowings
-7. View overdue books
-8. Exit
+![Library database entity-relationship diagram](library_erd.png)
 
-## Data Integrity and Error Handling
+The diagram shows all five tables. `book_authors` connects books and authors (many-to-many). Each borrowing belongs to one book and one member, while books and members can each have multiple borrowing records (one-to-many).
 
-The project protects the database from several common problems:
+A book can have multiple authors, and an author can write multiple books. The `book_authors` table connects them without repeating the same book information.
 
-- ISBN values are unique.
-- Member email addresses are unique.
-- A book cannot be checked out when `available_copies` is 0.
-- Checking out a book decreases its available copies by 1.
-- Returning a book sets its return date and increases available copies by 1.
-- A book cannot be deleted while it has an active borrowing.
-- A member cannot be deleted while they have an active borrowing.
-- Invalid IDs and invalid CLI input are handled with readable error messages.
+A book can also be checked out many times. I used a separate `borrowings` table because each checkout has its own member, checkout date, and return date. This allows the program to keep borrowing history even after a book is returned.
 
-## CRUD Functions
+## How Checkouts and Returns Work
 
-Create:
-- `add_book()`
-- `add_author()`
-- `add_member()`
-- `checkout_book()`
+When a member checks out a book, the program checks that the book and member exist and that at least one copy is available. It then creates a borrowing record and subtracts one from the available copies.
 
-Read:
-- `list_books()`
-- `search_books_by_title()`
-- `find_books_by_author()`
-- `list_member_borrowings()`
-- `list_overdue_books()`
-
-Update:
-- `return_book()`
-- `update_member_email()`
-
-Delete:
-- `delete_book()`
-- `delete_member()`
+When the book is returned, the program saves the return date and adds one back to the available copies. It also prevents the same borrowing from being returned twice.
 
 ## Testing
 
-The project was tested using the provided seed data and by checking the main library workflow:
+I tested the project using the sample data and checked the main features, including adding records, searching, checking out and returning books, and viewing borrowing history. I also checked cases such as duplicate ISBNs, invalid IDs, unavailable books, and trying to delete a record with borrowing history.
 
-- Seed 5 books, 3 authors, 4 members, and 6 borrowing records.
-- Search for books by title and by author.
-- Check out an available book and verify the available copy count decreases.
-- View a member's current borrowings.
-- Return the book and verify the available copy count increases.
-- Verify overdue books are detected using the checkout date.
-- Verify unavailable books cannot be checked out.
-- Verify books and members with active borrowings cannot be deleted.
-- Verify duplicate ISBNs and member emails are rejected.
+## One Thing I Had to Think Through
 
-## Design Decision
+One design decision was whether to store borrowing information in the `books` table. I used a separate table because one book can have many checkouts over time. Keeping those records separate makes it easier to track both current borrowings and past returns.
 
-I used a separate `Borrowing` model instead of a simple many-to-many association table between books and members. A borrowing needs its own data, especially `checkout_date` and `return_date`, so treating it as a model makes it easier to track borrowing history, current checkouts, and overdue books.
+## How to Demo the Program
+
+Run `python3 main.py`, choose `8` to see all records, then `4` to check out an available book to a listed member. Use the borrowing ID returned by option `4` in option `5` to return it. Database records persist across restarts.
