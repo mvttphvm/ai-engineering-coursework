@@ -2,6 +2,7 @@ import os
 import re
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -154,10 +155,9 @@ class DataPipeline:
             df[column] = df[column].fillna(department_median)
             df[column] = df[column].fillna(df[column].median())
 
-        # If a date could not be parsed, use the median valid survey date.
+        # Fill missing dates with the median of the valid survey dates.
         if df["survey_date"].isna().any() and df["survey_date"].notna().any():
-            valid_dates = df["survey_date"].dropna().sort_values().reset_index(drop=True)
-            median_date = valid_dates.iloc[len(valid_dates) // 2]
+            median_date = df["survey_date"].dropna().median()
             df["survey_date"] = df["survey_date"].fillna(median_date)
 
         missing_after_fill = int(df.isna().sum().sum())
