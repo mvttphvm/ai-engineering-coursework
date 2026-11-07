@@ -1,0 +1,16 @@
+{"question": "How do I reset my password if I forgot it?", "expected_sources": ["password-reset.md"], "expected_keywords": ["Forgot password", "reset link", "60 minutes"]}
+{"question": "My password reset link expired, how long are reset links valid?", "expected_sources": ["password-reset.md"], "expected_keywords": ["expires", "60 minutes"]}
+{"question": "My account is locked after too many failed sign in attempts, what do I do?", "expected_sources": ["password-reset.md"], "expected_keywords": ["locks", "30 minutes", "5 failed"]}
+{"question": "Where can I download my invoices and receipts?", "expected_sources": ["billing-and-invoices.md"], "expected_keywords": ["Invoice history", "PDF"]}
+{"question": "My payment failed, how long is the grace period before my account is downgraded?", "expected_sources": ["billing-and-invoices.md"], "expected_keywords": ["14-day grace period", "downgraded"]}
+{"question": "How do I update the credit card on my account?", "expected_sources": ["billing-and-invoices.md"], "expected_keywords": ["Payment method", "Replace card"]}
+{"question": "Can I get a refund on my monthly plan and within how many days?", "expected_sources": ["refunds.md"], "expected_keywords": ["14 days", "refunded in full"]}
+{"question": "How long do refunds take to appear on my statement?", "expected_sources": ["refunds.md"], "expected_keywords": ["5 to 10 business days"]}
+{"question": "How do I track my hardware order and delivery?", "expected_sources": ["shipping-and-delivery.md"], "expected_keywords": ["tracking number", "email"]}
+{"question": "My package says delivered but I never received it, what should I do?", "expected_sources": ["shipping-and-delivery.md"], "expected_keywords": ["marked delivered", "carrier investigation"]}
+{"question": "How do I delete my account and is there a grace period to cancel deletion?", "expected_sources": ["delete-account.md"], "expected_keywords": ["14-day grace period", "Permanently delete"]}
+{"question": "What data do you keep after I delete my account?", "expected_sources": ["delete-account.md"], "expected_keywords": ["invoices", "7 years"]}
+{"question": "How do I create an API key and is it shown again later?", "expected_sources": ["api-keys.md"], "expected_keywords": ["shown exactly once", "API keys"]}
+{"question": "My API key was leaked, what should I do?", "expected_sources": ["api-keys.md"], "expected_keywords": ["Revoke", "immediately"]}
+{"question": "Is there an outage right now and where can I check the service status?", "expected_sources": ["service-status-and-outages.md"], "expected_keywords": ["status page", "status.resolve.example.com"]}
+{"question": "What happens when I upgrade my plan mid month, am I charged right away?", "expected_sources": ["plans-and-plan-changes.md"], "expected_keywords": ["prorated", "immediately"]}

@@ -1,0 +1,46 @@
+# Resolve — full stack: Postgres+pgvector and the API.
+#   docker compose up --build
+# API on http://localhost:8000  (docs at /docs), DB on localhost:5432.
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: resolve
+      POSTGRES_PASSWORD: resolve
+      POSTGRES_DB: resolve
+    ports:
+      - "5432:5432"
+    volumes:
+      - resolve_pgdata:/var/lib/postgresql/data
+      # Enables the pgvector extension on first start (app/db.py also does
+      # this idempotently for non-Docker setups).
+      - ./db/init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resolve -d resolve"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://resolve:resolve@db:5432/resolve
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      LLM_FALLBACKS: ${LLM_FALLBACKS:-groq,ollama}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://host.docker.internal:11434}
+      RESOLVE_API_KEY: ${RESOLVE_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_REPO: ${GITHUB_REPO:-}
+      AGENT_DRY_RUN: ${AGENT_DRY_RUN:-true}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  resolve_pgdata:

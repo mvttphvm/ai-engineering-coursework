@@ -1,0 +1,35 @@
+name: CI
+
+# Two gates, both fully offline (fake embedder + fake provider — no API
+# keys, no model downloads, no Postgres):
+#   1. pytest            — the unit/integration suite
+#   2. eval regression   — python -m evals.run exits non-zero if
+#      recall@5 < 0.90 or MRR < 0.70 on the golden set (evals/run.py
+#      THRESHOLDS), so a retrieval change that hurts quality fails CI.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        env:
+          RESOLVE_STORE: memory
+          RESOLVE_EMBEDDER: fake
+        run: python -m pytest -q
+
+      - name: Eval regression gate
+        run: python -m evals.run

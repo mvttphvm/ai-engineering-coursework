@@ -1,0 +1,25 @@
+# Resolve — dependencies. Everything here is free/open-source ($0 stack).
+# Core API
+fastapi>=0.115,<1.0
+uvicorn>=0.30,<1.0
+pydantic>=2.7,<3.0
+httpx>=0.27,<1.0
+
+# Storage (Postgres + pgvector)
+sqlalchemy>=2.0,<3.0
+psycopg[binary]>=3.1,<4.0
+pgvector>=0.3,<1.0
+
+# Embeddings + reranking (local models, lazy-loaded — importing the app
+# never downloads anything; first real embed/rerank call does)
+sentence-transformers>=3.0,<4.0
+
+# MCP server (official Model Context Protocol Python package)
+mcp>=1.0,<2.0
+
+# Tracing (optional — lazily imported; Resolve runs fine without keys,
+# and app/tracing.py no-ops if the package or keys are absent)
+langfuse>=2.0,<3.0
+
+# Tests
+pytest>=8.0,<9.0
